@@ -1,0 +1,85 @@
+{
+  "name": "Site Monitor",
+  "description": "End-to-end site monitoring with Slack alerting. Daily heartbeat (active-point count + fleet/system summary) plus device/fleet transition alerts (silent, erroring, fleet-wide degradation). Fully config-driven — no site-specific values hardcoded.",
+  "options": [
+    {
+      "name": "slackWebhookUrl",
+      "description": "Slack Incoming Webhook URL. Leave empty to log alerts instead of sending.",
+      "optionType": "TYPE_STRING",
+      "secret": true
+    },
+    {
+      "name": "siteLabel",
+      "description": "Friendly site name shown in messages. Empty = use the NF site name.",
+      "optionType": "TYPE_STRING"
+    },
+    {
+      "name": "silentMinutes",
+      "description": "A device is 'silent' if it has not reported within this many minutes.",
+      "optionType": "TYPE_SIGNED",
+      "defaultValue": {
+        "signed": 30
+      }
+    },
+    {
+      "name": "freshnessHours",
+      "description": "Heartbeat counts a point as active if it got data within this many hours.",
+      "optionType": "TYPE_SIGNED",
+      "defaultValue": {
+        "signed": 24
+      }
+    },
+    {
+      "name": "errorRateThreshold",
+      "description": "A device is 'erroring' if its error rate exceeds this (0-1), or status is RED.",
+      "optionType": "TYPE_REAL",
+      "defaultValue": {
+        "real": 0.1
+      }
+    },
+    {
+      "name": "includeYellow",
+      "description": "Treat YELLOW devices as erroring too (more sensitive)."
+    },
+    {
+      "name": "fleetErrorJump",
+      "description": "Fleet alert when the erroring-device count jumps by at least this many in one interval.",
+      "optionType": "TYPE_SIGNED",
+      "defaultValue": {
+        "signed": 3
+      }
+    },
+    {
+      "name": "fleetErrorFraction",
+      "description": "Fleet alert when erroring devices reach this fraction of the fleet (0-1).",
+      "optionType": "TYPE_REAL",
+      "defaultValue": {
+        "real": 0.5
+      }
+    },
+    {
+      "name": "memThresholdPct",
+      "description": "Alert when host memory usage reaches this percent.",
+      "optionType": "TYPE_SIGNED",
+      "defaultValue": {
+        "signed": 90
+      }
+    },
+    {
+      "name": "diskThresholdPct",
+      "description": "Alert when host disk usage reaches this percent.",
+      "optionType": "TYPE_SIGNED",
+      "defaultValue": {
+        "signed": 90
+      }
+    },
+    {
+      "name": "resourceRealertHours",
+      "description": "While a memory/disk condition persists, re-alert every this many hours.",
+      "optionType": "TYPE_SIGNED",
+      "defaultValue": {
+        "signed": 6
+      }
+    }
+  ]
+}

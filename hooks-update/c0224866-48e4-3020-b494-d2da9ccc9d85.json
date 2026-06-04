@@ -1,0 +1,8 @@
+{
+  "name": "test-alert",
+  "entryPoint": "/hook-test.js",
+  "points": {
+    "noPoints": true
+  },
+  "mode": "MODE_ON_REQUEST"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "site-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end site monitoring with Slack alerting",
+  "dependencies": {}
+}

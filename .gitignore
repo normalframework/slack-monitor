@@ -1,0 +1,15 @@
+/dist
+*.js.map
+node_modules
+.npm
+combined.log
+error.log
+.DS_Store
+
+# Runtime config & state (not for version control)
+# settings.json holds the Slack webhook secret — never commit it.
+config/settings.json
+config/.monitor-state.json
+config/.heartbeat-state.json
+config/*.tmp.*
+config/logo.b64

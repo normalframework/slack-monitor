@@ -1,0 +1,11 @@
+{
+  "name": "monitor",
+  "entryPoint": "/hook-monitor.js",
+  "points": {
+    "noPoints": true
+  },
+  "schedule": {
+    "rrule": "DTSTART:20260101T000000Z\nRRULE:FREQ=MINUTELY;INTERVAL=5"
+  },
+  "mode": "MODE_SCHEDULED"
+}

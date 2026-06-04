@@ -1,0 +1,11 @@
+{
+  "name": "heartbeat",
+  "entryPoint": "/hook-heartbeat.js",
+  "points": {
+    "noPoints": true
+  },
+  "schedule": {
+    "rrule": "DTSTART:20260101T140000Z\nRRULE:FREQ=DAILY;INTERVAL=1"
+  },
+  "mode": "MODE_SCHEDULED"
+}

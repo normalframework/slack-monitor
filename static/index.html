@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Site Monitor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="bg-gray-50">
+  <div id="toast" class="toast hidden"></div>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <!-- Header -->
+    <header class="flex items-center gap-3 mb-5">
+      <img src="./logo.svg" alt="Slack" width="44" height="44" class="rounded-lg shadow-sm" />
+      <div class="flex-1">
+        <h1 class="text-2xl font-semibold" style="color:#20144C">Site Monitor</h1>
+        <p class="text-gray-500 text-sm">Heartbeats &amp; device / fleet / host alerting to Slack</p>
+      </div>
+      <span id="statusText" class="text-sm text-gray-500"></span>
+    </header>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap items-center gap-2 mb-6">
+      <button id="btnRefresh" class="btn btn-ghost">↻ Refresh</button>
+      <button id="btnTest" class="btn btn-primary">Send test alert</button>
+      <button id="btnRunMonitor" class="btn btn-ghost">Run monitor now</button>
+      <button id="btnRunHeartbeat" class="btn btn-ghost">Run heartbeat now</button>
+    </div>
+
+    <!-- Status cards -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+      <div class="card">
+        <div class="card-label">Active points</div>
+        <div id="hbActive" class="card-value">—</div>
+        <div id="hbSub" class="card-sub">no heartbeat yet</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Reporting</div>
+        <div id="devReporting" class="card-value">—</div>
+        <div id="devTotalSub" class="card-sub">of — devices</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Silent</div>
+        <div id="devSilent" class="card-value">—</div>
+        <div class="card-sub">no recent data</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Erroring</div>
+        <div id="devErroring" class="card-value">—</div>
+        <div class="card-sub">RED or high error rate</div>
+      </div>
+    </section>
+    <p id="protoBreakdown" class="text-xs text-gray-500 mb-6"></p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <!-- Fleet table -->
+      <section class="lg:col-span-2 bg-white rounded-lg shadow-sm p-4">
+        <h2 class="text-sm font-semibold text-gray-700 mb-3">Devices</h2>
+        <div class="overflow-x-auto">
+          <table class="fleet">
+            <thead>
+              <tr><th>Device</th><th>Protocol</th><th>Status</th><th>Last data</th><th class="text-right">Err rate</th></tr>
+            </thead>
+            <tbody id="fleetTable"><tr><td colspan="5" class="text-gray-400">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Right column -->
+      <div class="space-y-6">
+        <section class="bg-white rounded-lg shadow-sm p-4">
+          <h2 class="text-sm font-semibold text-gray-700 mb-3">Errors (24h)</h2>
+          <div id="errorsPanel" class="text-sm text-gray-600">—</div>
+        </section>
+        <section class="bg-white rounded-lg shadow-sm p-4">
+          <h2 class="text-sm font-semibold text-gray-700 mb-3">Host &amp; system</h2>
+          <div id="sysPanel" class="text-sm text-gray-600 space-y-1">—</div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Config -->
+    <section class="bg-white rounded-lg shadow-sm p-5">
+      <h2 class="text-sm font-semibold text-gray-700 mb-1">Configuration</h2>
+      <p class="text-xs text-gray-500 mb-4">Saved to the app and used by every hook on its next run — no restart needed. Leave the webhook empty to log alerts instead of sending.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="field md:col-span-2">
+          <label for="cfg-webhook">Slack Incoming Webhook URL</label>
+          <input type="password" id="cfg-webhook" placeholder="https://hooks.slack.com/services/…" autocomplete="off" />
+        </div>
+        <div class="field"><label for="cfg-sitelabel">Site label (optional)</label><input type="text" id="cfg-sitelabel" placeholder="(uses NF site name)" /></div>
+        <div class="field"><label for="cfg-silent">Silent after (minutes)</label><input type="number" id="cfg-silent" min="1" /></div>
+        <div class="field"><label for="cfg-fresh">Heartbeat freshness (hours)</label><input type="number" id="cfg-fresh" min="1" /></div>
+        <div class="field"><label for="cfg-errrate">Error-rate threshold (0–1)</label><input type="number" id="cfg-errrate" step="0.01" min="0" /></div>
+        <div class="field"><label for="cfg-mem">Memory alert at (%)</label><input type="number" id="cfg-mem" min="1" max="100" /></div>
+        <div class="field"><label for="cfg-disk">Disk alert at (%)</label><input type="number" id="cfg-disk" min="1" max="100" /></div>
+        <div class="field"><label for="cfg-realert">Resource re-alert (hours)</label><input type="number" id="cfg-realert" min="1" /></div>
+        <div class="field"><label for="cfg-fleetjump">Fleet alert: jump by</label><input type="number" id="cfg-fleetjump" min="1" /></div>
+        <div class="field"><label for="cfg-fleetfrac">Fleet alert: fraction (0–1)</label><input type="number" id="cfg-fleetfrac" step="0.05" min="0" max="1" /></div>
+        <div class="field flex items-end"><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="cfg-yellow" /> Treat YELLOW as erroring</label></div>
+      </div>
+      <div class="mt-4">
+        <button id="btnSaveConfig" class="btn btn-primary">Save configuration</button>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./app.js?v=3"></script>
+</body>
+</html>
