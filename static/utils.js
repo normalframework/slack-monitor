@@ -2,7 +2,17 @@
 // pattern used by the abound plugin (token from URL, browser-origin requests,
 // gRPC-transcoded file + hook endpoints).
 
-export const APP_ID = "site-monitor";
+// Derive the app id from the URL the plugin is served at
+// (/api/v1/apps/<id>/static/...) so file + hook calls always target the app
+// this dashboard actually belongs to. Never hardcode it — the same code runs
+// under different app ids (e.g. site-monitor, slack-dev) and a fixed id would
+// make saving settings write into the wrong app.
+function deriveAppId() {
+  const m = window.location.pathname.match(/\/apps\/([^\/]+)/);
+  return (m && m[1]) || "site-monitor";
+}
+
+export const APP_ID = deriveAppId();
 
 export function getAuthToken() {
   const params = new URLSearchParams(window.location.search);
