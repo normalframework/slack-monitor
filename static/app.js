@@ -1,4 +1,4 @@
-import * as U from "./utils.js?v=3";
+import * as U from "./utils.js?v=5";
 
 const DEFAULTS = {
   slackWebhookUrl: "",

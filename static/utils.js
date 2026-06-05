@@ -2,14 +2,17 @@
 // pattern used by the abound plugin (token from URL, browser-origin requests,
 // gRPC-transcoded file + hook endpoints).
 
-// Derive the app id from the URL the plugin is served at
-// (/api/v1/apps/<id>/static/...) so file + hook calls always target the app
-// this dashboard actually belongs to. Never hardcode it — the same code runs
-// under different app ids (e.g. site-monitor, slack-dev) and a fixed id would
-// make saving settings write into the wrong app.
+// Derive the app id from the URL the plugin is served at. Plugin static files
+// are served at /api/v1/apps/static/<app>/...  (see src/application/static.go),
+// so the app id is the path segment right AFTER "static". The file/hook API,
+// by contrast, lives at /api/v1/apps/<app>/files/... (no "static").
+// Never hardcode the id — the same code runs under different app ids
+// (e.g. site-monitor, slack-dev) and a fixed id makes saves land in the wrong app.
 function deriveAppId() {
-  const m = window.location.pathname.match(/\/apps\/([^\/]+)/);
-  return (m && m[1]) || "site-monitor";
+  const m = window.location.pathname.match(/\/apps\/static\/([^\/]+)/);
+  const id = (m && m[1]) || "site-monitor";
+  console.log("[site-monitor][deriveAppId]", { pathname: window.location.pathname, APP_ID: id });
+  return id;
 }
 
 export const APP_ID = deriveAppId();
@@ -106,7 +109,9 @@ export async function readFile(path) {
 // Write an app file. NF's file API expects a JSON-encoded base64 `data` scalar.
 export async function writeFile(path, content) {
   const b64 = utf8ToB64(content);
-  const r = await fetch(`${window.location.origin}/api/v1/apps/${APP_ID}/files${path}`, {
+  const url = `${window.location.origin}/api/v1/apps/${APP_ID}/files${path}`;
+  console.log("[site-monitor][writeFile] POST", url, `(APP_ID=${APP_ID})`);
+  const r = await fetch(url, {
     method: "POST",
     headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(b64),
